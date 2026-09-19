@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyanide v2 - Menu</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: white;
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            overflow: hidden;
+            animation: hideSplash 0.1s ease 4.2s forwards;
+        }
+
+        #code-stream {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: #111111;
+            font-size: 11px;
+            font-weight: bold;
+            overflow: hidden;
+            pointer-events: none;
+            padding: 10px;
+            box-sizing: border-box;
+            line-height: 1.2;
+            z-index: 101;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #code-stream.show {
+            opacity: 1;
+        }
+
+        .splash-img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            z-index: 102;
+            opacity: 1;
+            animation: showAndDisappear 0.8s ease forwards;
+        }
+
+        @keyframes showAndDisappear {
+            0% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+
+        @keyframes hideSplash {
+            to { visibility: hidden; pointer-events: none; }
+        }
+
+        #intro-text-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle, #78288c 0%, #3a0842 100%);
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 105;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.5s ease;
+        }
+
+        #intro-text-screen.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .typing-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.9), 0 0 25px rgba(168, 85, 247, 0.8);
+            letter-spacing: 1px;
+            border-right: 2px solid #a855f7;
+            white-space: nowrap;
+            padding-right: 4px;
+        }
+
+        #main-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            opacity: 0;
+            z-index: 10;
+            visibility: hidden;
+        }
+
+        #main-content.show {
+            visibility: visible;
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .main-img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 20px;
+        }
+
+        .key-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            width: 300px;
+        }
+
+        .key-input {
+            width: 100%;
+            padding: 16px;
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            box-sizing: border-box;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .key-input::placeholder {
+            color: #aaa;
+        }
+
+        .key-input:focus {
+            border-color: #2ecc71;
+            background-color: rgba(255, 255, 255, 0.12);
+            box-shadow: 0 0 12px rgba(46, 204, 113, 0.4);
+        }
+
+        .key-btn {
+            width: 100%;
+            padding: 15px;
+            background-color: #2ecc71;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.4);
+        }
+        .key-btn:active { opacity: 0.8; }
+
+        #mod-menu {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 360px;
+            max-height: 85vh;
+            background: rgba(20, 20, 20, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 20;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            overflow-y: auto;
+        }
+
+        .menu-header-img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            margin-bottom: 12px;
+            border-radius: 12px;
+        }
+
+        .info-box {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            font-size: 14px;
+            color: #ddd;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            box-sizing: border-box;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-item span:last-child {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .add-happ-btn {
+            width: 100%;
+            padding: 13px;
+            background-color: #e74c3c;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+            transition: opacity 0.2s;
+        }
+        .add-happ-btn:active { opacity: 0.8; }
+
+        .hack-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .hack-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.06);
+            padding: 12px 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 15px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #555;
+            transition: .3s;
+            border-radius: 26px;
+        }
+        .slider:before {
+            position: absolute; content: "";
+            height: 20px; width: 20px;
+            left: 3px; bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #2ecc71; }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        #ios-notification {
+            position: fixed;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 380px;
+            background: rgba(35, 35, 35, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            z-index: 999;
+            transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        #ios-notification.show { top: 15px; }
+
+        .notif-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+
+        .notif-content {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .notif-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .notif-text {
+            font-size: 14px;
+            color: #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="ios-notification">
+        <img src="https://cdn.upanhlaylink.com/i/fasZCG66.jpeg" alt="Avatar" class="notif-avatar" id="notif-img">
+        <div class="notif-content" style="width: 100%;">
+            <div class="notif-title">
+                <span>(Thông báo)</span>
+                <span style="font-size: 11px; color: #aaa; font-weight: normal;">Bây giờ</span>
+            </div>
+            <div class="notif-text" id="notif-message-text">well well well</div>
+        </div>
+    </div>
+
+    <!-- 1. Màn hình đầu -->
+    <div id="splash-screen">
+        <div id="code-stream"></div>
+        <img src="https://cdn.upanhlaylink.com/i/KZyL94rZ.png" alt="Splash Logo" class="splash-img">
+    </div>
+
+    <!-- 2. Màn hình thứ 2 -->
+    <div id="intro-text-screen">
+        <div class="typing-text" id="typewriter"></div>
+    </div>
+
+    <!-- 3. Màn hình nhập Key & Menu chính -->
+    <div id="main-content">
+        <img src="https://cdn.upanhlaylink.com/i/Nh6ynd47.jpeg" alt="Main Logo" class="main-img">
+        <div class="key-container">
+            <input type="text" class="key-input" id="key-input" placeholder="Nhập Key của bạn...">
+            <button class="key-btn" onclick="checkKey()">Xác Nhận Key</button>
+        </div>
+    </div>
+
+    <div id="mod-menu">
+        <img src="https://cdn.upanhlaylink.com/i/Nh6ynd47.jpeg" alt="Menu Logo" class="menu-header-img">
+        
+        <div class="info-box">
+            <div class="info-item">
+                <span>UID:</span>
+                <span id="display-uid">Đang tạo...</span>
+            </div>
+            <div class="info-item">
+                <span>IP Máy:</span>
+                <span id="display-ip">Đang lấy IP...</span>
+            </div>
+        </div>
+
+        <button class="add-happ-btn" onclick="openHappAndCopy()">Add Happ</button>
+
+        <div class="hack-list">
+            <div class="hack-item">
+                <span>Bay Dù 1s</span>
+                <label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Bay Dù 1s')"><span class="slider"></span></label>
+            </div>
+            <div class="hack-item">
+                <span>ESP Line / Box</span>
+                <label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'ESP Line / Box')"><span class="slider"></span></label>
+            </div>
+            <div class="hack-item">
+                <span>ESP Distance & Health</span>
+                <label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'ESP Distance & Health')"><span class="slider"></span></label>
+            </div>
+            <div class="hack-item">
+                <span>Aimbot</span>
+                <label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Aimbot')"><span class="slider"></span></label>
+            </div>
+            <div class="hack-item">
+                <span>No Recoil</span>
+                <label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'No Recoil')"><span class="slider"></span></label>
+            </div>
+            <div class="hack-item">
+                <span>Aim Silent</span>
+                <label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Aim Silent')"><span class="slider"></span></label>
+            </div>
+            <div class="hack-item">
+                <span>Speed Hack X8</span>
+                <label class="switch"><input type="checkbox" onchange="toggleFeature(this, 'Speed Hack')"><span class="slider"></span></label>
+            </div>
+            <div class="hack-item">
+                <span>Antiban Safe Mode</span>
+                <label class="switch"><input type="checkbox" checked onchange="toggleFeature(this, 'Antiban Safe Mode')"><span class="slider"></span></label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // BLOCK-KICK OR HACK CODE -F12
+(KHÔNG KHÓA KHI PASTE)
+        // ==========================================
+
+        3.6
+        // ==========================================
+        // KEY MENU
+        // ==========================================
+        const VALID_KEYS = new Set([
+            "TRLL-5E23-B499-32DF", "TRLL-C4CA-4238-A0B9", "TRLL-C81E-728D-9D4C", "TRLL-ECCB-C87E-4B5C", "TRLL-A87F-F679-A2F3",
+            "TRLL-E4DA-3B7F-BBCE", "TRLL-1679-091C-5A88", "TRLL-8F14-E45F-CEEA", "TRLL-C9F0-F895-FB98", "TRLL-45C4-8CCE-2E2D",
+            "TRLL-D3D9-4468-02A4", "TRLL-6512-BD43-D9CA", "TRLL-C20A-D4D7-6FE9", "TRLL-C51C-E410-C124", "TRLL-AAB3-2389-22BC",
+            "TRLL-9BF3-1C7F-F062", "TRLL-C74D-97B0-1EAE", "TRLL-70EF-DF2E-C9B0", "TRLL-6F49-22F4-5568", "TRLL-1F0E-3DAD-9990",
+            "TRLL-98F1-3708-2101", "TRLL-3C59-DC04-8E88", "TRLL-B6D7-67D2-F8ED", "TRLL-3769-3CFC-7480", "TRLL-1FF1-DE77-4005",
+            "TRLL-8E29-6A06-7A37", "TRLL-4E73-2CED-3463", "TRLL-02E7-4F10-E032", "TRLL-33E7-5FF0-9DD6", "TRLL-6EA9-AB1B-AA0E",
+            "TRLL-3417-3CB3-8F07", "TRLL-C16A-5320-FA47", "TRLL-6364-D3F0-F495", "TRLL-182B-E0C5-CDCD", "TRLL-E369-853D-F766",
+            "TRLL-1C38-3CD3-0B7C", "TRLL-19CA-14E7-EA63", "TRLL-A5BF-C9E0-7964", "TRLL-A577-1BCE-93E2", "TRLL-D67D-8AB4-F4C1",
+            "TRLL-D645-920E-395F", "TRLL-3416-A75F-4CEA", "TRLL-A1D0-C6E8-3F02", "TRLL-17E6-2166-FC85", "TRLL-F717-7163-C833",
+            "TRLL-6C83-49CC-7260", "TRLL-D9D4-F495-E875", "TRLL-67C6-A1E7-CE56", "TRLL-642E-92EF-B794", "TRLL-F457-C545-A9DE",
+            "TRLL-C0C7-C76D-30BD", "TRLL-2838-023A-778D", "TRLL-9A11-5815-4DFA", "TRLL-D82C-8D16-19AD", "TRLL-A684-ECEE-E76F",
+            "TRLL-B53B-3A3D-6AB9", "TRLL-9F61-408E-3AFB", "TRLL-72B3-2A1F-754B", "TRLL-66F0-41E1-6A60", "TRLL-093F-65E0-80A2",
+            "TRLL-072B-030B-A126", "TRLL-7F39-F831-7FBD", "TRLL-44F6-83A8-4163", "TRLL-03AF-DBD6-6E79", "TRLL-EA5D-2F1C-4608",
+            "TRLL-FC49-0CA4-5C00", "TRLL-3295-C76A-CBF4", "TRLL-735B-90B4-5681", "TRLL-A3F3-90D8-8E4C", "TRLL-14BF-A6BB-1487",
+            "TRLL-7CBB-C409-EC99", "TRLL-E2C4-20D9-28D4", "TRLL-32BB-90E8-976A", "TRLL-D2DD-EA18-F006", "TRLL-AD61-AB14-3223",
+            "TRLL-D09B-F415-44A3", "TRLL-FBD7-939D-6749", "TRLL-28DD-2C79-55CE", "TRLL-35F4-A8D4-65E6", "TRLL-D1FE-173D-08E9",
+            "TRLL-F033-AB37-C302", "TRLL-43EC-517D-68B6", "TRLL-9778-D5D2-19C5", "TRLL-FE9F-C289-C3FF", "TRLL-68D3-0A95-9472",
+            "TRLL-3EF8-1541-6F77", "TRLL-93DB-85ED-909C", "TRLL-C7E1-249F-FC03", "TRLL-2A38-A4A9-316C", "TRLL-7647-966B-7343",
+            "TRLL-8613-985E-C49E", "TRLL-5422-9ABF-CFA5", "TRLL-92CC-2275-32D1", "TRLL-98DC-E83D-A57B", "TRLL-F4B9-EC30-AD9F",
+            "TRLL-812B-4BA2-87F5", "TRLL-2665-7D5F-F902", "TRLL-E2EF-524F-BF3D", "TRLL-ED3D-2C21-991E", "TRLL-AC62-7AB1-CCBD",
+            "TRLL-F899-139D-F5E1", "TRLL-38B3-EFF8-BAF5", "TRLL-EC89-5663-7A99", "TRLL-6974-CE5A-C660", "TRLL-C9E1-074F-5B3F",
+            "TRLL-65B9-EEA6-E1CC", "TRLL-F093-5E4C-D592", "TRLL-A97D-A629-B098", "TRLL-A3C6-5C29-7427", "TRLL-2723-D092-B638",
+            "TRLL-5F93-F983-524D", "TRLL-698D-51A1-9D8A", "TRLL-7F6F-FAA6-BB0B", "TRLL-7327-8A4A-8696", "TRLL-5FD0-B37C-D7DB",
+            "TRLL-2B44-928A-E11F", "TRLL-C451-47DE-E729", "TRLL-EB16-0DE1-DE89", "TRLL-5EF0-5993-8BA7", "TRLL-07E1-CD7D-CA89",
+            "TRLL-DA4F-B5C6-E93E", "TRLL-4C56-FF4C-E4AA", "TRLL-A0A0-80F4-2E6F", "TRLL-202C-B962-AC59", "TRLL-C8FF-E9A5-87B1",
+            "TRLL-3DEF-184A-D8F4", "TRLL-0690-59B7-EF84", "TRLL-EC5D-ECCA-5ED3", "TRLL-76DC-611D-6EBA", "TRLL-D1F4-91A4-04D6",
+            "TRLL-9B86-1925-1A19", "TRLL-1AFA-34A7-F984", "TRLL-65DE-D535-3C5E", "TRLL-9FC3-D715-2BA9", "TRLL-0252-2A2B-2726",
+            "TRLL-7F1D-E29E-6DA1", "TRLL-42A0-E188-F503", "TRLL-3988-C7F8-8EBC", "TRLL-013D-4071-66EC", "TRLL-E00D-A03B-685A",
+            "TRLL-1385-974E-D590", "TRLL-0F28-B5D4-9B30", "TRLL-A8BA-A565-54F9", "TRLL-903C-E922-5FCA", "TRLL-0A09-C884-4BA8",
+            "TRLL-2B24-D495-052A", "TRLL-A5E0-0132-373A", "TRLL-8D5E-957F-2978", "TRLL-47D1-E990-583C", "TRLL-F221-7062-E9A3",
+            "TRLL-7EF6-05FC-8DBA", "TRLL-A8F1-5EDA-80C5", "TRLL-37A7-49D8-08E4", "TRLL-B3E3-E393-C77E", "TRLL-1D7F-7ABC-18FC",
+            "TRLL-2A79-EA27-C279", "TRLL-1C9A-C015-9C94", "TRLL-6C4B-761A-28B7", "TRLL-0640-9663-226A", "TRLL-140F-6969-D521",
+            "TRLL-B73C-E398-C39F", "TRLL-BD4C-9AB7-30F5", "TRLL-82AA-4B0A-F34C", "TRLL-0777-D5C1-7D40", "TRLL-FA7C-DFAD-1A5A",
+            "TRLL-9766-527F-2B5D", "TRLL-7E77-57B1-E12A", "TRLL-5878-A7AB-84FB", "TRLL-006F-52E9-102A", "TRLL-3636-6388-1777",
+            "TRLL-149E-9677-A598", "TRLL-A4A0-42CF-4FD6", "TRLL-1FF8-A7B5-DC7A", "TRLL-F7E6-C855-04CE", "TRLL-BF82-2969-6F7A",
+            "TRLL-8216-1242-827B", "TRLL-38AF-8613-4B65", "TRLL-96DA-2F59-0CD7", "TRLL-8F85-5179-6779", "TRLL-8F53-295A-7387",
+            "TRLL-0451-17B0-E0A1", "TRLL-FC22-1309-7460", "TRLL-4C5B-DE74-A8F1", "TRLL-CEDE-BB6E-872F", "TRLL-6CDD-60EA-0045",
+            "TRLL-EECC-A5B6-365D", "TRLL-9872-ED9F-C22F", "TRLL-31FE-FC0E-570C", "TRLL-9DCB-88E0-1376", "TRLL-A255-7A7B-2E94",
+            "TRLL-CFEC-DB27-6F63", "TRLL-0AA1-883C-6411", "TRLL-58A2-FC6E-D39F", "TRLL-BD68-6FD6-40BE", "TRLL-A597-E505-02F5",
+            "TRLL-0336-DCBA-B05B", "TRLL-084B-6FBB-1072", "TRLL-85D8-CE59-0AD8", "TRLL-0E65-972D-CE68", "TRLL-84D9-EE44-E457"
+        ]);
+
+        let notifTimeout = null;
+
+        function triggerNotification(message) {
+            const notif = document.getElementById('ios-notification');
+            const notifText = document.getElementById('notif-message-text');
+            
+            notifText.innerText = message;
+            notif.classList.add('show');
+
+            if (notifTimeout) clearTimeout(notifTimeout);
+
+            notifTimeout = setTimeout(() => {
+                notif.classList.remove('show');
+            }, 3500);
+        }
+
+        function toggleFeature(checkbox, featureName) {
+            if (checkbox.checked) {
+                triggerNotification(`Rick: Đã Bật [${featureName}] thành công!`);
+            } else {
+                triggerNotification(`Rick: Đã Tắt [${featureName}].`);
+            }
+        }
+
+        function openHappAndCopy() {
+            const uuidPart1 = Math.random().toString(16).substring(2, 6).toUpperCase();
+            const uuidPart2 = Math.random().toString(16).substring(2, 6).toUpperCase();
+            const fullLink = `http://localhost:9898/Local/cyanide.html?18983E03-DD61-4EC0-8FF6-${uuidPart1}${uuidPart2}`;
+
+            navigator.clipboard.writeText(fullLink).catch(() => {
+                const textArea = document.createElement("textarea");
+                textArea.value = fullLink;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand("copy");
+                document.body.removeChild(textArea);
+            });
+
+            triggerNotification("Rick: đang mở app happ!");
+
+            setTimeout(() => {
+                window.location.href = "happ://"; 
+            }, 800);
+        }
+
+        function loadClientInfo() {
+            const randomUID = 'UID-' + Math.floor(100000 + Math.random() * 900000);
+            document.getElementById('display-uid').innerText = randomUID;
+
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('display-ip').innerText = data.ip;
+                })
+                .catch(() => {
+                    document.getElementById('display-ip').innerText = "192.168.1." + Math.floor(Math.random() * 200 + 10);
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const codeStream = document.getElementById('code-stream');
+            const lines = [
+                'initializeSystem()', 'loadModules.js', 'verifyKeyDatabase(com.dts.freeifreth-com.dts.freefiremax)', 
+                'bypassFreeFire.kitty', 'hookMethod_0x99()', 'patchMemoryAddress()', 
+                'injectPayload_v2()', 'status: active', 'loadingCoreModules...', 
+                'executingPayload()', '74927401830829284928348', 'authenticatingClient(73)'
+            ];
+
+            let interval;
+
+            setTimeout(() => {
+                codeStream.classList.add('show');
+                interval = setInterval(() => {
+                    const randomLine = lines[Math.floor(Math.random() * lines.length)];
+                    const div = document.createElement('div');
+                    div.innerText = '>> ' + randomLine;
+                    codeStream.appendChild(div);
+                    if (codeStream.childNodes.length > 25) {
+                        codeStream.removeChild(codeStream.firstChild);
+                    }
+                }, 40);
+            }, 800);
+
+            setTimeout(() => {
+                if (interval) clearInterval(interval);
+                codeStream.style.opacity = '0';
+                setTimeout(() => { codeStream.remove(); }, 300);
+
+                const introScreen = document.getElementById('intro-text-screen');
+                introScreen.classList.add('show');
+                startTypewriter();
+            }, 4200);
+        });
+
+        function startTypewriter() {
+            const textToType = "by :Kitty•-•Zalo : 0939251990";
+            const targetElement = document.getElementById('typewriter');
+            let index = 0;
+
+            function type() {
+                if (index < textToType.length) {
+                    targetElement.innerHTML += textToType.charAt(index);
+                    index++;
+                    setTimeout(type, 80);
+                } else {
+                    setTimeout(() => {
+                        const introScreen = document.getElementById('intro-text-screen');
+                        introScreen.style.opacity = '0';
+                        setTimeout(() => {
+                            introScreen.style.display = 'none';
+                            document.getElementById('main-content').classList.add('show');
+                        }, 500);
+                    }, 1500);
+                }
+            }
+            type();
+        }
+
+        function checkKey() {
+            const inputVal = document.getElementById('key-input').value.trim();
+
+            if (inputVal === '') {
+                alert('Vui lòng nhập key!');
+                return;
+            }
+
+            if (VALID_KEYS.has(inputVal)) {
+                document.getElementById('main-content').style.display = 'none';
+                document.getElementById('mod-menu').style.display = 'flex';
+                loadClientInfo();
+                triggerNotification("well well well");
+            } else {
+                alert('Key không hợp lệ!');
+            }
+        }
+    </script>
+</body>
+</html>
